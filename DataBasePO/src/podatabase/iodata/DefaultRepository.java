@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import podatabase.User;
+import podatabase.exceptions.DatabaseConnectionException;
 import podatabase.exceptions.InvalidDataSource;
 import podatabase.exceptions.InvalidValues;
 import podatabase.exceptions.TableAlreadyExistsException;
@@ -31,7 +33,21 @@ import podatabase.tables.Value;
 
 public class DefaultRepository implements Repository<File> {
 
-	Adapter<String> adapter = new DefaultStringAdapter();
+	private Adapter<String> adapter = new DefaultStringAdapter();
+	private User user;
+	private File source;
+	
+	public DefaultRepository(User user, File source) {
+		this.user = user;
+		this.source = source;
+		if(!isUserAuth()) {
+			throw new DatabaseConnectionException("Unauthorized access to repository");
+		}
+	}
+	
+	public boolean isUserAuth() {
+		return this.getUser() == null || this.getUser().equals(this.user);
+	}
 
 	@Override
 	public void saveTable(Table table, File source) {
@@ -230,7 +246,6 @@ public class DefaultRepository implements Repository<File> {
 		List<Record> records = new ArrayList<>();
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
-
 			String line = reader.readLine();
 			while (line != null) {
 				if (adapter.isThisRecord(line) && adapter.belongsToTable(line, table)) {
@@ -319,5 +334,44 @@ public class DefaultRepository implements Repository<File> {
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	public User getUser() {
+		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
 
+			String line = reader.readLine();
+			while (line != null) {
+				if (adapter.isThisUser(line)) {
+					return adapter.formatToUser(line);
+				}
+				line = reader.readLine();
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+
+	@Override
+	public boolean saveUser(User u) {
+
+		try (FileWriter writer = new FileWriter(source, true);
+				BufferedWriter bWriter = new BufferedWriter(writer);
+				PrintWriter out = new PrintWriter(bWriter)) {
+
+			out.println(adapter.userToFormat(u));
+
+		} catch (IOException e) {
+
+			e.printStackTrace();
+
+		}
+		
+		return true;
+	}
+	
 }

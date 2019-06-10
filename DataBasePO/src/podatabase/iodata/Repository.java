@@ -3,6 +3,7 @@ package podatabase.iodata;
 import java.util.List;
 import java.util.Map;
 
+import podatabase.User;
 import podatabase.queries.Condition;
 import podatabase.tables.Record;
 import podatabase.tables.Table;
@@ -18,4 +19,8 @@ public interface Repository<T> {
 	
 	public void dropTable(String tableName, T source);
 	public void deleteRecords(String tableName, Map<String, Condition> conditions, T source);
+	
+	public User getUser();
+	public boolean saveUser(User u);
+	public boolean isUserAuth();
 }

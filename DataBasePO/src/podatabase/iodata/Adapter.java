@@ -1,5 +1,6 @@
 package podatabase.iodata;
 
+import podatabase.User;
 import podatabase.tables.Record;
 import podatabase.tables.Table;
 
@@ -13,4 +14,8 @@ public interface Adapter<T> {
 	public boolean isThisRecord(T format);
 	
 	public boolean belongsToTable(T format, Table t);
+	
+	public T userToFormat(User u);
+	public User formatToUser(T format);
+	public boolean isThisUser(T format);
 }

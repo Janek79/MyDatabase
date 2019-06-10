@@ -1,7 +1,8 @@
 import java.io.File;
 import java.util.List;
 
-import podatabase.DatabaseTXT;
+import podatabase.Database;
+import podatabase.DatabaseTXTConnector;
 import podatabase.queries.Query;
 
 public class DataBasePO {
@@ -9,7 +10,10 @@ public class DataBasePO {
 	public static void main(String[] args) {
 
 		File loc = new File("dataBase.txt");
-		DatabaseTXT db = new DatabaseTXT(loc);
+		Database db = DatabaseTXTConnector.getDatabase(loc, "user", "123");
+		
+//		File loc2 = new File("anotherBase.txt");
+//		Database db2 = DatabaseTXTConnector.createDatabase(loc2, "user", "123");
 		
 		
 		Query q = db.query().create("LudziePop")
@@ -35,7 +39,7 @@ public class DataBasePO {
 				.whereIntFieldIsBiggerThan("Wiek", 20);
 		
 		
-		Query samochody = db.query().create("Samochody").addIntField("Id").id().addStringField("Model").notNull().addStringField("Marka").notNull().unique().addIntField("Rok produkcji");
+		//Query samochody = db.query().create("Samochody").addIntField("Id").id().addStringField("Model").notNull().addStringField("Marka").notNull().unique().addIntField("Rok produkcji");
 		
 		
 //		Integer[] id = {1, 2, 3, 4, 5, 6};

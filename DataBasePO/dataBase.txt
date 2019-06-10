@@ -13,6 +13,7 @@ r:Samochody:5;M8;BMW;111;
 r:Samochody:6;6;Mazda;2345;
 r:Samochody:123;BMW;DW;132;
 r:Samochody:1234;BMW;DW2;null;
+u:user:123
 r:Samochody:7;BMW;DW25;1324;
 r:Samochody:8;BMW;DW257;1324;
 r:Samochody:10;Nieznany;Szewrolet;null;

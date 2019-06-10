@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import podatabase.User;
 import podatabase.exceptions.InvalidName;
 import podatabase.tables.Field;
 import podatabase.tables.Record;
@@ -119,6 +120,22 @@ public class DefaultStringAdapter implements Adapter<String> {
 	@Override
 	public boolean belongsToTable(String format, Table table) {
 		return format.split(":")[1].equals(table.getTableName());
+	}
+
+	@Override
+	public String userToFormat(User u) {
+		return String.join(":", "u", u.getUsername(), u.getPassword());
+	}
+
+	@Override
+	public User formatToUser(String format) {
+		String[] userStrings = format.split(":");
+		return new User(userStrings[1], userStrings[2]);
+	}
+	
+	@Override
+	public boolean isThisUser(String format) {
+		return format.split(":")[0].equals("u");
 	}
 	
 }
