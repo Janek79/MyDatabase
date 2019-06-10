@@ -19,10 +19,10 @@ public class DataBasePO {
 		}
 
 		//Przykładowe kwarendy
-		Query q = db.query().create("Ludzie")
+		Query ludzie = db.query().create("Ludzie")
 			.addStringField("Imie")
 			.addStringField("Nazwisko")
-			.addIntField("Wiek").id();
+			.addIntField("Wiek");
 		
 		
 		
@@ -34,7 +34,7 @@ public class DataBasePO {
 		
 		for(int i = 0; i < imiona.length; i++) {
 			
-			insertLudzie.add(db.query().insert("LudziePop")
+			insertLudzie.add(db.query().insert("Ludzie")
 					.addIntValue("Wiek", lata[i])
 					.addStringValue("Imie", imiona[i])
 					.addStringValue("Nazwisko", nazwiska[i]));
@@ -57,8 +57,8 @@ public class DataBasePO {
 		Query samochody = db.query()
 				.create("Samochody")
 				.addIntField("Id").id()
-				.addStringField("Model").notNull()
-				.addStringField("Marka").notNull().unique()
+				.addStringField("Model").notNull().unique()
+				.addStringField("Marka").notNull()
 				.addIntField("Rok produkcji");
 		
 		
@@ -81,10 +81,29 @@ public class DataBasePO {
 		Query<List> selectAllSamochody = db.query().select("Samochody").withField("Model");
 		Query<List> selectSomeSamochody = db.query().select("Samochody").whereStringFieldIsEqual("Marka", "Ford").where("Id", (x) -> (Integer)x*(Integer)x < 40);
 		
-		Query deleteSomeSamochody = db.query().delete("Samochody").where("Rok produkcji", (x) -> (Integer)x < 4);
+		Query deleteSomeSamochody = db.query().delete("Samochody").where("Rok produkcji", (x) -> (Integer)x < 1500);
 		Query dropSamochody = db.query().drop("Samochody");
 		
+//		ludzie.execute();
+//		samochody.execute();
+//		
+//		insertLudzie.forEach(Query::execute);
+//		insertSamochody.forEach(Query::execute);
 		
+//		selectAllLudzie.execute().forEach(System.out::println);
+//		selectSomeLudzie.execute().forEach(System.out::println);
+		
+//		deleteAllLudzie.execute();
+//		selectAllLudzie.execute().forEach(System.out::println);
+		
+//		selectAllSamochody.execute().forEach(System.out::println);
+//		selectSomeSamochody.execute().forEach(System.out::println);
+		
+//		deleteSomeSamochody.execute();
+//		selectAllSamochody.execute().forEach(System.out::println);
+		
+//		dropLudzie.execute();
+//		dropSamochody.execute();
 	}
 
 }

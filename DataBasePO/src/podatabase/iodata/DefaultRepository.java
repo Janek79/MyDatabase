@@ -310,7 +310,7 @@ public class DefaultRepository implements Repository<File> {
 				if (adapter.isThisRecord(line) && adapter.belongsToTable(line, table)) {
 					Record r = adapter.formatToRecord(line, table);
 					if (!conditions.keySet().stream().allMatch((s) -> r.getValue(s).getValue() == null
-							|| conditions.get(s).doesMeetCondition(r.getValue(s).getValue()))) {
+							|| !conditions.get(s).doesMeetCondition(r.getValue(s).getValue()))) {
 						text.append(line + "\n");
 					}
 				} else {
