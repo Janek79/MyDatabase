@@ -21,11 +21,6 @@ public class DataBasePO {
 		File loc = new File("dataBase.txt");
 		DatabaseTXT db = new DatabaseTXT(loc);
 		
-		Repository<File> rep = new DefaultRepository();
-
-//		rep.saveRecord(r1, loc);
-//		
-//		records.forEach(System.out::println);
 		
 		Query q = db.query().create("LudziePop")
 			.addStringField("Imie")
@@ -49,21 +44,25 @@ public class DataBasePO {
 				.withField("Wiek")
 				.whereIntFieldIsBiggerThan("Wiek", 20);
 		
-		//List wynik = selector.execute();
-		//wynik.forEach(System.out::println);
 		
-		//db.getQueryBuilder().drop("Ludzie").execute();
+		Query samochody = db.query().create("Samochody").addIntField("Id").id().addStringField("Model").notNull().addStringField("Marka").notNull().unique().addIntField("Rok produkcji");
 		
-		//db.query().insert("LudziePop").addStringValue("Nazwisko", "Bezimienny2").execute();
+		
+//		Integer[] id = {1, 2, 3, 4, 5, 6};
+//		String[] modele = {"Fiesta", "Octavia", "Focus", "Yaris", "M8", "6"};
+//		String[] marki = {"Ford", "Skoda", "Ford", "Toyota", "BMW", "Mazda"};
+//		Integer[] lata = {1932, 1922, 1453, 1410, 111, 2345};
+//		
+//		for(int i = 0; i < id.length; i++) {
+//			db.query().insert("Samochody")
+//					.addIntValue("Rok produkcji", lata[i])
+//					.addStringValue("Model", modele[i])
+//					.addStringValue("Marka", marki[i])
+//					.addIntValue("Id", id[i]).execute();
+//		}
+		
+		db.query().select("Samochody").withField("Model").withField("Rok produkcji").whereIntFieldIsBiggerThan("Rok produkcji", 1000).execute().forEach(System.out::println);
 
-		//rep.getAllRecordList("LudziePop", loc).forEach(System.out::println);
-
-		selector.execute().forEach(System.out::println);
-		
-//		db.query().delete("LudziePop").where("Wiek", (v) -> (Integer)v == 26).execute();
-		
-		//q.execute();
-		//insert.execute();
 	}
 
 }

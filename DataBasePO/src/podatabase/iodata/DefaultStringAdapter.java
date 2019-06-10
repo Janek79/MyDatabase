@@ -31,7 +31,8 @@ public class DefaultStringAdapter implements Adapter<String> {
 			if(containsImproperChars(f.getFieldName())) {
 				throw new InvalidName("Field name " + f.getFieldName() + " cannot contains characters like ':', ',' or ':'");
 			}
-			format.append(f.getType().getTypeName() + "," + f.getFieldName() + ";");
+			String[] stringRecord = {f.getType().getTypeName(), f.getFieldName(), f.isId() ? "id" : "", !f.isNullable() ? "notNull" : "", f.isUnique() ? "unique" : ""};
+			format.append(String.join(",", stringRecord) + ";");
 		}
 		
 		return format.toString();
@@ -45,13 +46,16 @@ public class DefaultStringAdapter implements Adapter<String> {
 		List<Field> fields = new ArrayList<>();
 		
 		for(String s: split[2].split(";")) {
-			String[] pair = s.split(",");
+			List<String> stringField = Arrays.asList(s.split(","));
 			try {
 				
-				Class type = Class.forName(pair[0]);
-				String fieldName = pair[1];
+				Class type = Class.forName(stringField.get(0));
+				String fieldName = stringField.get(1);
+				boolean isId = stringField.contains("id");
+				boolean isNullable = !stringField.contains("notNull");
+				boolean isUnique = stringField.contains("unique");
 				
-				Field field = new Field(fieldName, type);
+				Field field = new Field(fieldName, type, isNullable, isUnique, isId);
 				fields.add(field);
 				
 			} catch (ClassNotFoundException e) {

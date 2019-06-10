@@ -12,10 +12,17 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
+import podatabase.exceptions.InvalidDataSource;
 import podatabase.exceptions.InvalidValues;
 import podatabase.exceptions.TableAlreadyExistsException;
 import podatabase.exceptions.TableDoesntExist;
+import podatabase.exceptions.ValueCannotBeNull;
+import podatabase.exceptions.ValueMustBeUnique;
 import podatabase.queries.Condition;
 import podatabase.tables.Field;
 import podatabase.tables.Record;
@@ -92,6 +99,35 @@ public class DefaultRepository implements Repository<File> {
 		return false;
 	}
 
+	//for saveRecord method
+	private boolean doesRecordExist(Table table, File source, String fieldName, Object value) {
+				
+		List<Record> records = new ArrayList<>();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
+
+			String line = reader.readLine();
+			while (line != null) {
+				if (adapter.isThisRecord(line)) {
+					if (adapter.belongsToTable(line, table)) {
+						Record r = adapter.formatToRecord(line, table);
+						if(r.getValue(fieldName).getValue().equals(value)) {
+							return true;
+						}
+					}
+				}
+				line = reader.readLine();
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return false;
+	}
+	
 	@Override
 	public void saveRecord(Record record, File source) {
 
@@ -101,30 +137,39 @@ public class DefaultRepository implements Repository<File> {
 			throw new TableDoesntExist(record.getTableName());
 		}
 
-		List<Value> orderedValues = new ArrayList<>();
-		for (Field f : table.getFields()) {
-			boolean inserted = false;
-
-			for (Value v : record.getValues()) {
-				if (v.getValue() != null) {
-					if (f.getFieldName().equals(v.getFieldName()) && f.getType().equals(v.getValue().getClass())) {
-						orderedValues.add(v);
-						inserted = true;
-						break;
-					}
-				}
+		//are inputed values correct (fields names)
+		record.getValues().stream().map((v) -> v.getFieldName()).forEach((n) -> {
+			
+			//if user type in wrong field name
+			if(table.getField(n) == null) {
+				throw new InvalidValues("There aren't any field with name " + n +" in table " + table.getTableName());
 			}
-
-			if (!inserted) {
-				if (f.isNullable()) {
-					orderedValues.add(new Value(f.getFieldName(), null)); // TODO niebezpiecznie tu
-				} else {
-					throw new InvalidValues("Invalid values to save");
-				}
+			
+		});
+		
+		
+		//are inputed values correct (nullable and unique)
+		table.getFields().stream().map((f) -> f.getFieldName()).forEach((n) -> {
+			
+			//if field isn't nullable and user didn't input any value or input null
+			if(!table.getField(n).isNullable() && (record.getValue(n) == null || record.getValue(n).getValue() == null)) {
+				throw new ValueCannotBeNull(n);
 			}
-		}
+			
+			//if field is unique, user input not null value and record with such value already exists
+			if(table.getField(n).isUnique() && !(record.getValue(n) == null || record.getValue(n).getValue() == null) && doesRecordExist(table, source, n, record.getValue(n).getValue())) {
+				throw new ValueMustBeUnique(n);
+			}
+			
+		});
 
-		Record orderedRecord = new Record(table.getTableName(), orderedValues);
+		//sorting inputed values (in order like in table)
+		List sortedValues = table.getFields().stream()
+				.map((f) -> record.getValue(f.getFieldName()) != null ? record.getValue(f.getFieldName()) : new Value(f.getFieldName(), null))
+				.collect(Collectors.toList());
+		
+
+		Record orderedRecord = new Record(table.getTableName(), sortedValues);
 
 		try (FileWriter writer = new FileWriter(source, true);
 				BufferedWriter bWriter = new BufferedWriter(writer);
@@ -171,31 +216,30 @@ public class DefaultRepository implements Repository<File> {
 
 		return records;
 	}
-	
+
 	public void dropTable(String tableName, File source) {
 		System.out.println(tableName);
-		
+
 		Table table = getTable(tableName, source);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);
 		}
-		
-		
+
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
 			StringBuffer text = new StringBuffer();
-			
+
 			String line;
-			
+
 			while ((line = reader.readLine()) != null) {
-				if(!adapter.belongsToTable(line, table)) {
+				if (!adapter.belongsToTable(line, table)) {
 					text.append(line + "\n");
 				}
 			}
-						
-			try(FileOutputStream fileOut = new FileOutputStream(source)){
+
+			try (FileOutputStream fileOut = new FileOutputStream(source)) {
 				fileOut.write(text.toString().getBytes());
-			}		
+			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -204,36 +248,36 @@ public class DefaultRepository implements Repository<File> {
 		}
 
 	}
-	
+
 	@Override
 	public void deleteRecords(String tableName, Map<String, Condition> conditions, File source) {
-		
+
 		Table table = getTable(tableName, source);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);
 		}
-		
-		
+
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
 			StringBuffer text = new StringBuffer();
-			
+
 			String line;
-			
+
 			while ((line = reader.readLine()) != null) {
-				if(adapter.isThisRecord(line) && adapter.belongsToTable(line, table)) {
+				if (adapter.isThisRecord(line) && adapter.belongsToTable(line, table)) {
 					Record r = adapter.formatToRecord(line, table);
-					if(!conditions.keySet().stream().allMatch((s) -> r.getValue(s).getValue() == null || conditions.get(s).doesMeetCondition(r.getValue(s).getValue()))) {
+					if (!conditions.keySet().stream().allMatch((s) -> r.getValue(s).getValue() == null
+							|| conditions.get(s).doesMeetCondition(r.getValue(s).getValue()))) {
 						text.append(line + "\n");
 					}
 				} else {
 					text.append(line + "\n");
 				}
 			}
-			
-			try(FileOutputStream fileOut = new FileOutputStream(source)){
+
+			try (FileOutputStream fileOut = new FileOutputStream(source)) {
 				fileOut.write(text.toString().getBytes());
-			}		
+			}
 
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -242,4 +286,5 @@ public class DefaultRepository implements Repository<File> {
 		}
 	}
 
+	
 }

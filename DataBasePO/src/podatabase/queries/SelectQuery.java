@@ -66,7 +66,10 @@ public class SelectQuery<T> implements Query<List> {
 				.collect(Collectors.toList());
 		
 		
-		List<Record> results = records.stream().filter((r) -> conditions.keySet().stream().allMatch((n) -> conditions.get(n).doesMeetCondition(r.getValue(n).getValue()))).collect(Collectors.toList());
+		List<Record> results = records.stream()
+				.filter((r) -> conditions.keySet().stream()
+						.allMatch((n) -> r.getValue(n).getValue() != null && conditions.get(n).doesMeetCondition(r.getValue(n).getValue())))
+				.collect(Collectors.toList());
 		
 		if(!fields.isEmpty()) {
 			results.forEach((r) -> notSelectedFields.forEach((f) -> r.getValues().remove(r.getValue(f))));
