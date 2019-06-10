@@ -43,7 +43,7 @@ public class InsertQuery<T> implements Query<Boolean> {
 	@Override
 	public Boolean execute() {
 		
-		rep.saveRecord(record, source);
+		rep.saveRecord(record);
 		
 		return true;
 	}

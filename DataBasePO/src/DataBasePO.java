@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import podatabase.Database;
@@ -10,56 +11,79 @@ public class DataBasePO {
 	public static void main(String[] args) {
 
 		File loc = new File("dataBase.txt");
-		Database db = DatabaseTXTConnector.getDatabase(loc, "user", "123");
-		
-//		File loc2 = new File("anotherBase.txt");
-//		Database db2 = DatabaseTXTConnector.createDatabase(loc2, "user", "123");
-		
-		
-		Query q = db.query().create("LudziePop")
+		Database db;
+		if(DatabaseTXTConnector.doesDatabaseExist(loc)) {
+			db = DatabaseTXTConnector.getDatabase(loc, "user", "123");
+		} else {
+			db = DatabaseTXTConnector.createDatabase(loc, "user", "123");
+		}
+
+		//Przykładowe kwarendy
+		Query q = db.query().create("Ludzie")
 			.addStringField("Imie")
 			.addStringField("Nazwisko")
 			.addIntField("Wiek").id();
 		
-//		String[] imiona = {"Maciej", "Jerzy", "Marcin", "Sławek", "Waldek", "Stan"};
-//		String[] nazwiska = {"Taylor", "Schneider", "Szyba", "Nowak", "Kowalski", "Czarny"};
-//		Integer[] lata = {34, 21, 26, 26, 46, 22};
-//		
-//		for(int i = 0; i < imiona.length; i++) {
-//			db.getBuilder().insert("LudziePop")
-//					.addIntValue("Wiek", lata[i])
-//					.addStringValue("Imie", imiona[i])
-//					.addStringValue("Nazwisko", nazwiska[i]).execute();
-//		}
 		
-		Query<List> selector = db.query()
-				.select("LudziePop")
+		
+		List<Query> insertLudzie = new ArrayList<>();
+		
+		String[] imiona = {"Maciej", "Ania", "Jerzy", "Marcin", "Kasia", "Sławek", "Waldek", "Beata", "Stan"};
+		String[] nazwiska = {"Taylor", "Trwała", "Schneider", "Szyba", "Ukrop", "Nowak", "Kowalski", "Albatros", "Czarny"};
+		Integer[] lata = {34, 21, 26, 26, 46, 22, 54, 28, 44};
+		
+		for(int i = 0; i < imiona.length; i++) {
+			
+			insertLudzie.add(db.query().insert("LudziePop")
+					.addIntValue("Wiek", lata[i])
+					.addStringValue("Imie", imiona[i])
+					.addStringValue("Nazwisko", nazwiska[i]));
+			
+		}
+		
+		Query<List> selectAllLudzie = db.query()
+				.select("Ludzie");
+		
+		Query<List> selectSomeLudzie = db.query()
+				.select("Ludzie")
 				.withField("Imie")
 				.withField("Wiek")
-				.whereIntFieldIsBiggerThan("Wiek", 20);
+				.whereIntFieldIsBiggerThan("Wiek", 25);
+		
+		Query deleteAllLudzie = db.query().delete("Ludzie");
+		Query dropLudzie = db.query().drop("Ludzie");
 		
 		
-		//Query samochody = db.query().create("Samochody").addIntField("Id").id().addStringField("Model").notNull().addStringField("Marka").notNull().unique().addIntField("Rok produkcji");
+		Query samochody = db.query()
+				.create("Samochody")
+				.addIntField("Id").id()
+				.addStringField("Model").notNull()
+				.addStringField("Marka").notNull().unique()
+				.addIntField("Rok produkcji");
 		
 		
-//		Integer[] id = {1, 2, 3, 4, 5, 6};
-//		String[] modele = {"Fiesta", "Octavia", "Focus", "Yaris", "M8", "6"};
-//		String[] marki = {"Ford", "Skoda", "Ford", "Toyota", "BMW", "Mazda"};
-//		Integer[] lata = {1932, 1922, 1453, 1410, 111, 2345};
-//		
-//		for(int i = 0; i < id.length; i++) {
-//			db.query().insert("Samochody")
-//					.addIntValue("Rok produkcji", lata[i])
-//					.addStringValue("Model", modele[i])
-//					.addStringValue("Marka", marki[i])
-//					.addIntValue("Id", id[i]).execute();
-//		}
+		List<Query> insertSamochody = new ArrayList<>();
+		
+		Integer[] id = {1, 2, 3, 4, 5, 6, 7};
+		String[] modele = {"Fiesta", "Octavia", "Focus", "Yaris", "M8", "6", "KA"};
+		String[] marki = {"Ford", "Skoda", "Ford", "Toyota", "BMW", "Mazda", "Ford"};
+		Integer[] lataP = {1932, 1922, 1453, 1410, 111, 2345, 1312};
+		
+		for(int i = 0; i < id.length; i++) {
+			insertSamochody.add(db.query().insert("Samochody")
+					.addIntValue("Rok produkcji", lataP[i])
+					.addStringValue("Model", modele[i])
+					.addStringValue("Marka", marki[i])
+					.addIntValue("Id", id[i]));
+		}
 
-		//db.query().insert("Samochody").addValue("Id", 10).addValue("Marka", "Szewrolet").addValue("Model", "Nieznany").addNullValue("Rok produkcji").execute();
 		
-		db.query().select("Samochody").withField("Marka").whereIntFieldIsEqual("Id", 10).withField("Model").execute().forEach(System.out::println);
+		Query<List> selectAllSamochody = db.query().select("Samochody").withField("Model");
+		Query<List> selectSomeSamochody = db.query().select("Samochody").whereStringFieldIsEqual("Marka", "Ford").where("Id", (x) -> (Integer)x*(Integer)x < 40);
 		
-		//db.query().create("DwaID").addStringField("ID1").addStringField("ID2").id().execute();
+		Query deleteSomeSamochody = db.query().delete("Samochody").where("Rok produkcji", (x) -> (Integer)x < 4);
+		Query dropSamochody = db.query().drop("Samochody");
+		
 		
 	}
 

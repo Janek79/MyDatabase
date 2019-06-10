@@ -12,21 +12,16 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import podatabase.User;
 import podatabase.exceptions.DatabaseConnectionException;
-import podatabase.exceptions.InvalidDataSource;
 import podatabase.exceptions.InvalidValues;
 import podatabase.exceptions.TableAlreadyExistsException;
 import podatabase.exceptions.TableDoesntExist;
 import podatabase.exceptions.ValueCannotBeNull;
 import podatabase.exceptions.ValueMustBeUnique;
 import podatabase.queries.Condition;
-import podatabase.tables.Field;
 import podatabase.tables.Record;
 import podatabase.tables.Table;
 import podatabase.tables.Value;
@@ -50,12 +45,12 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public void saveTable(Table table, File source) {
+	public void saveTable(Table table) {
 		try (FileWriter writer = new FileWriter(source, true);
 				BufferedWriter bWriter = new BufferedWriter(writer);
 				PrintWriter out = new PrintWriter(bWriter)) {
 
-			if (!doesTableExist(table.getTableName(), source)) {
+			if (!doesTableExist(table.getTableName())) {
 				out.println(adapter.tableToFormat(table));
 			} else {
 				throw new TableAlreadyExistsException();
@@ -69,7 +64,7 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public Table getTable(String tableName, File source) {
+	public Table getTable(String tableName) {
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
 
@@ -94,7 +89,7 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public boolean doesTableExist(String tableName, File source) {
+	public boolean doesTableExist(String tableName) {
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
 
 			String line = reader.readLine();
@@ -116,7 +111,7 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	// for saveRecord method
-	private boolean doesRecordExist(Table table, File source, String fieldName, Object value) {
+	private boolean doesRecordExist(Table table, String fieldName, Object value) {
 
 		List<Record> records = new ArrayList<>();
 
@@ -145,9 +140,9 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public void saveRecord(Record record, File source) {
+	public void saveRecord(Record record) {
 
-		Table table = getTable(record.getTableName(), source);
+		Table table = getTable(record.getTableName());
 
 		if (table == null) {
 			throw new TableDoesntExist(record.getTableName());
@@ -175,7 +170,7 @@ public class DefaultRepository implements Repository<File> {
 			// if field is unique, user input not null value and record with such value
 			// already exists
 			if (table.getField(n).isUnique() && !(record.getValue(n) == null || record.getValue(n).getValue() == null)
-					&& doesRecordExist(table, source, n, record.getValue(n).getValue())) {
+					&& doesRecordExist(table, n, record.getValue(n).getValue())) {
 				throw new ValueMustBeUnique(n);
 			}
 
@@ -204,9 +199,9 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public List<Record> getAllRecordList(String tableName, File source) {
+	public List<Record> getAllRecordList(String tableName) {
 
-		Table table = getTable(tableName, source);
+		Table table = getTable(tableName);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);
@@ -235,9 +230,9 @@ public class DefaultRepository implements Repository<File> {
 		return records;
 	}
 
-	public List<Record> getRecordsList(String tableName, Map<String, Condition> conditions, File source) {
+	public List<Record> getRecordsList(String tableName, Map<String, Condition> conditions) {
 
-		Table table = getTable(tableName, source);
+		Table table = getTable(tableName);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);
@@ -266,10 +261,9 @@ public class DefaultRepository implements Repository<File> {
 		return records;
 	}
 
-	public void dropTable(String tableName, File source) {
-		System.out.println(tableName);
+	public void dropTable(String tableName) {
 
-		Table table = getTable(tableName, source);
+		Table table = getTable(tableName);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);
@@ -299,9 +293,9 @@ public class DefaultRepository implements Repository<File> {
 	}
 
 	@Override
-	public void deleteRecords(String tableName, Map<String, Condition> conditions, File source) {
+	public void deleteRecords(String tableName, Map<String, Condition> conditions) {
 
-		Table table = getTable(tableName, source);
+		Table table = getTable(tableName);
 
 		if (table == null) {
 			throw new TableDoesntExist(tableName);

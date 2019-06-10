@@ -13,6 +13,10 @@ public class DatabaseTXTConnector {
 
 	private DatabaseTXTConnector() {}
 	
+	public static boolean doesDatabaseExist(File file) {
+		return file.exists();
+	}
+
 	//creating TXTdatabase without security
 	public static DatabaseTXT createDatabase(File file) {
 		if(file.exists()) {

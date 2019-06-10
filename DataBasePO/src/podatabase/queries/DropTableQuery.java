@@ -21,7 +21,7 @@ public class DropTableQuery<T> implements Query<Boolean>{
 
 	@Override
 	public Boolean execute() {
-		rep.dropTable(tableName, source);
+		rep.dropTable(tableName);
 		return true;
 	}
 

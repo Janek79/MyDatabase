@@ -38,18 +38,6 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 		return addField(name, String.class);
 	}
 	
-//	public CreateTableQuery addForeignKey(String name, String tableName) {
-//		return this.addField(new Field(name, String.class));
-//	}
-	
-//	private CreateTableQuery addField(Field field) {
-//		if(this.table.getField(field.getFieldName()) != null) {
-//			this.table.getFields().add(field);
-//		}
-//		
-//		return this;
-//	}
-
 	public String getTableName() {
 		return this.table.getTableName();
 	}
@@ -80,7 +68,7 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 
 	@Override
 	public Boolean execute() {
-		rep.saveTable(table, source);
+		rep.saveTable(table);
 		return true;
 	}
 	

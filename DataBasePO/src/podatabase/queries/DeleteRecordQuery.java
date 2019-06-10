@@ -30,7 +30,7 @@ public class DeleteRecordQuery<T> implements Query<Boolean> {
 
 	@Override
 	public Boolean execute() {
-		rep.deleteRecords(tableName, conditions, source);
+		rep.deleteRecords(tableName, conditions);
 		return true;
 	}
 

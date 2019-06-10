@@ -78,10 +78,10 @@ public class SelectQuery<T> implements Query<List> {
 		//return records;
 		
 		return !fields.isEmpty() ? 
-				(List<Record>) rep.getRecordsList(tableName, conditions, source).stream()
+				(List<Record>) rep.getRecordsList(tableName, conditions).stream()
 				.map((r) -> new Record(tableName, ((Record) r).getValues().stream().filter((v) -> fields.contains(v.getFieldName())).collect(Collectors.toList())))
 				.collect(Collectors.toList()) : 
-					rep.getRecordsList(tableName, conditions, source);
+					rep.getRecordsList(tableName, conditions);
 	}
 
 	
