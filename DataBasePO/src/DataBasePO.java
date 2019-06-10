@@ -1,22 +1,12 @@
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 import podatabase.DatabaseTXT;
-import podatabase.iodata.DefaultRepository;
-import podatabase.iodata.DefaultStringAdapter;
-import podatabase.iodata.Repository;
-import podatabase.queries.Condition;
 import podatabase.queries.Query;
-import podatabase.tables.Field;
-import podatabase.tables.Record;
-import podatabase.tables.Table;
-import podatabase.tables.Value;
 
 public class DataBasePO {
 
 	public static void main(String[] args) {
-		DefaultStringAdapter adapter = new DefaultStringAdapter();
 
 		File loc = new File("dataBase.txt");
 		DatabaseTXT db = new DatabaseTXT(loc);
@@ -60,9 +50,13 @@ public class DataBasePO {
 //					.addStringValue("Marka", marki[i])
 //					.addIntValue("Id", id[i]).execute();
 //		}
-		
-		db.query().select("Samochody").withField("Model").withField("Rok produkcji").whereIntFieldIsBiggerThan("Rok produkcji", 1000).execute().forEach(System.out::println);
 
+		//db.query().insert("Samochody").addValue("Id", 10).addValue("Marka", "Szewrolet").addValue("Model", "Nieznany").addNullValue("Rok produkcji").execute();
+		
+		db.query().select("Samochody").withField("Marka").whereIntFieldIsEqual("Id", 10).withField("Model").execute().forEach(System.out::println);
+		
+		//db.query().create("DwaID").addStringField("ID1").addStringField("ID2").id().execute();
+		
 	}
 
 }

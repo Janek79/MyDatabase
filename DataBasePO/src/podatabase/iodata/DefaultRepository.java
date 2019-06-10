@@ -99,9 +99,9 @@ public class DefaultRepository implements Repository<File> {
 		return false;
 	}
 
-	//for saveRecord method
+	// for saveRecord method
 	private boolean doesRecordExist(Table table, File source, String fieldName, Object value) {
-				
+
 		List<Record> records = new ArrayList<>();
 
 		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
@@ -111,7 +111,7 @@ public class DefaultRepository implements Repository<File> {
 				if (adapter.isThisRecord(line)) {
 					if (adapter.belongsToTable(line, table)) {
 						Record r = adapter.formatToRecord(line, table);
-						if(r.getValue(fieldName).getValue().equals(value)) {
+						if (r.getValue(fieldName).getValue().equals(value)) {
 							return true;
 						}
 					}
@@ -124,10 +124,10 @@ public class DefaultRepository implements Repository<File> {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public void saveRecord(Record record, File source) {
 
@@ -137,37 +137,39 @@ public class DefaultRepository implements Repository<File> {
 			throw new TableDoesntExist(record.getTableName());
 		}
 
-		//are inputed values correct (fields names)
+		// are inputed values correct (fields names)
 		record.getValues().stream().map((v) -> v.getFieldName()).forEach((n) -> {
-			
-			//if user type in wrong field name
-			if(table.getField(n) == null) {
-				throw new InvalidValues("There aren't any field with name " + n +" in table " + table.getTableName());
+
+			// if user type in wrong field name
+			if (table.getField(n) == null) {
+				throw new InvalidValues("There aren't any field with name " + n + " in table " + table.getTableName());
 			}
-			
-		});
-		
-		
-		//are inputed values correct (nullable and unique)
-		table.getFields().stream().map((f) -> f.getFieldName()).forEach((n) -> {
-			
-			//if field isn't nullable and user didn't input any value or input null
-			if(!table.getField(n).isNullable() && (record.getValue(n) == null || record.getValue(n).getValue() == null)) {
-				throw new ValueCannotBeNull(n);
-			}
-			
-			//if field is unique, user input not null value and record with such value already exists
-			if(table.getField(n).isUnique() && !(record.getValue(n) == null || record.getValue(n).getValue() == null) && doesRecordExist(table, source, n, record.getValue(n).getValue())) {
-				throw new ValueMustBeUnique(n);
-			}
-			
+
 		});
 
-		//sorting inputed values (in order like in table)
+		// are inputed values correct (nullable and unique)
+		table.getFields().stream().map((f) -> f.getFieldName()).forEach((n) -> {
+
+			// if field isn't nullable and user didn't input any value or input null
+			if (!table.getField(n).isNullable()
+					&& (record.getValue(n) == null || record.getValue(n).getValue() == null)) {
+				throw new ValueCannotBeNull(n);
+			}
+
+			// if field is unique, user input not null value and record with such value
+			// already exists
+			if (table.getField(n).isUnique() && !(record.getValue(n) == null || record.getValue(n).getValue() == null)
+					&& doesRecordExist(table, source, n, record.getValue(n).getValue())) {
+				throw new ValueMustBeUnique(n);
+			}
+
+		});
+
+		// sorting inputed values (in order like in table)
 		List sortedValues = table.getFields().stream()
-				.map((f) -> record.getValue(f.getFieldName()) != null ? record.getValue(f.getFieldName()) : new Value(f.getFieldName(), null))
+				.map((f) -> record.getValue(f.getFieldName()) != null ? record.getValue(f.getFieldName())
+						: new Value(f.getFieldName(), null))
 				.collect(Collectors.toList());
-		
 
 		Record orderedRecord = new Record(table.getTableName(), sortedValues);
 
@@ -203,6 +205,38 @@ public class DefaultRepository implements Repository<File> {
 				if (adapter.isThisRecord(line)) {
 					if (adapter.belongsToTable(line, table)) {
 						records.add(adapter.formatToRecord(line, table));
+					}
+				}
+				line = reader.readLine();
+			}
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return records;
+	}
+
+	public List<Record> getRecordsList(String tableName, Map<String, Condition> conditions, File source) {
+
+		Table table = getTable(tableName, source);
+
+		if (table == null) {
+			throw new TableDoesntExist(tableName);
+		}
+
+		List<Record> records = new ArrayList<>();
+
+		try (BufferedReader reader = new BufferedReader(new FileReader(source))) {
+
+			String line = reader.readLine();
+			while (line != null) {
+				if (adapter.isThisRecord(line) && adapter.belongsToTable(line, table)) {
+					Record record = adapter.formatToRecord(line, table);
+					if(conditions.isEmpty() || record.getValues().stream().allMatch((v) -> v.getValue() == null  || !conditions.containsKey(v.getFieldName()) || conditions.get(v.getFieldName()).doesMeetCondition(v.getValue()))) {
+						records.add(record);
 					}
 				}
 				line = reader.readLine();
@@ -286,5 +320,4 @@ public class DefaultRepository implements Repository<File> {
 		}
 	}
 
-	
 }

@@ -14,6 +14,7 @@ public interface Repository<T> {
 	
 	public void saveRecord(Record record, T source);
 	public List<Record> getAllRecordList(String tableName, T source);
+	public List<Record> getRecordsList(String tableName, Map<String, Condition> condition, T source);
 	
 	public void dropTable(String tableName, T source);
 	public void deleteRecords(String tableName, Map<String, Condition> conditions, T source);

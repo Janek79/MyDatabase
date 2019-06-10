@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import podatabase.exceptions.ExplicitId;
 import podatabase.iodata.DefaultRepository;
 import podatabase.iodata.Repository;
 import podatabase.tables.Field;
@@ -59,8 +60,12 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 	}
 
 	public CreateTableQuery id() {
-		currentField.setId(true);
-		return this;
+		if(table.getIdField() == null) {
+			currentField.setId(true);
+			return this;
+		} else {
+			throw new ExplicitId();
+		}
 	}
 	
 	public CreateTableQuery notNull() {

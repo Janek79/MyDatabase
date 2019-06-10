@@ -26,6 +26,10 @@ public class InsertQuery<T> implements Query<Boolean> {
 		this.record.addValue(val);
 		return this;
 	}
+
+	public InsertQuery addNullValue(String fieldName) {
+		return addValue(fieldName, null);
+	}
 	
 	public InsertQuery addIntValue(String fieldName, Integer value) {
 		return addValue(fieldName, value);
