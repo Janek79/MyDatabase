@@ -19,7 +19,7 @@ Każdy ze zwróconych obiektów jest już wykonywalną komendą, jednak użytkow
   Przykład: 
 (Database)db.query().select("Samochody").withField("Marka").withField("Model").whereIntFieldIsLowerThan(1970).execute();
 Wynikiem tego programu będzie lista samochodów, które były produkowane przed 1970 rokiem, zaprezentowanych przez ich markę i model.
-Więcej przykładów znajduje się w klasie DataBasePO
+Więcej przykładów znajduje się w klasie DataBasePO.
 
 Każda z utworzonych kwerend korzysta z obiektu z interfejsu Repository, który to bezpośrednio modyfikuje bazę. 
 Sama baza danych składa się z tabel, rekordów i ewentualnych informacji o użytkowniku. 
