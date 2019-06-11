@@ -2,7 +2,7 @@
 Database created in pure Java
 
 # Opis po polsku (polish description) 
-Prezentowana projekt pozwala na tworzenie niezabezpieczonych lub zabezpieczonych nazwą użytkownika i hasłem baz danych operujących na plikach tekstowych. 
+Prezentowany projekt pozwala na tworzenie niezabezpieczonych lub zabezpieczonych nazwą użytkownika i hasłem baz danych operujących na plikach tekstowych. 
 Przy czym należy przyznać, że ochrona ta jest w zasadzie czysto iluzoryczna, więc nie należy pokładać w niej ufności :)
 
 Punktem wejścia jest klasa DatabaseConnector. 
