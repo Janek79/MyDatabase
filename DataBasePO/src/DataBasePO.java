@@ -50,7 +50,7 @@ public class DataBasePO {
 				.withField("Wiek")
 				.whereIntFieldIsBiggerThan("Wiek", 25);
 		
-		Query deleteAllLudzie = db.query().delete("Ludzie");
+		Query deleteAllLudzie = db.query().truncate("Ludzie");
 		Query dropLudzie = db.query().drop("Ludzie");
 		
 		
