@@ -2,6 +2,8 @@ package podatabase.tables;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class Table {
 	private String tableName;
@@ -43,6 +45,11 @@ public class Table {
 		if(this.getField(field.getFieldName()) == null) {
 			this.fields.add(field);
 		}
+	}
+	
+	public Field getIdField() {
+		Optional<Field> op = this.getFields().stream().filter((f) -> f.isId()).findFirst();
+		return op.isPresent() ? op.get() : null;
 	}
 
 	

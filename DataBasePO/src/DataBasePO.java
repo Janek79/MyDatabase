@@ -2,68 +2,108 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import podatabase.DatabaseTXT;
-import podatabase.iodata.DefaultRepository;
-import podatabase.iodata.DefaultStringAdapter;
-import podatabase.iodata.Repository;
-import podatabase.queries.Condition;
+import podatabase.Database;
+import podatabase.DatabaseTXTConnector;
 import podatabase.queries.Query;
-import podatabase.tables.Field;
-import podatabase.tables.Record;
-import podatabase.tables.Table;
-import podatabase.tables.Value;
 
 public class DataBasePO {
 
 	public static void main(String[] args) {
-		DefaultStringAdapter adapter = new DefaultStringAdapter();
 
 		File loc = new File("dataBase.txt");
-		DatabaseTXT db = new DatabaseTXT(loc);
-		
-		Repository<File> rep = new DefaultRepository();
+		Database db;
+		if(DatabaseTXTConnector.doesDatabaseExist(loc)) {
+			db = DatabaseTXTConnector.getDatabase(loc, "user", "123");
+		} else {
+			db = DatabaseTXTConnector.createDatabase(loc, "user", "123");
+		}
 
-//		rep.saveRecord(r1, loc);
-//		
-//		records.forEach(System.out::println);
-		
-		Query q = db.query().create("LudziePop")
+		//Przykładowe kwarendy
+		Query ludzie = db.query().create("Ludzie")
 			.addStringField("Imie")
 			.addStringField("Nazwisko")
-			.addIntField("Wiek").id();
+			.addIntField("Wiek");
 		
-//		String[] imiona = {"Maciej", "Jerzy", "Marcin", "Sławek", "Waldek", "Stan"};
-//		String[] nazwiska = {"Taylor", "Schneider", "Szyba", "Nowak", "Kowalski", "Czarny"};
-//		Integer[] lata = {34, 21, 26, 26, 46, 22};
-//		
-//		for(int i = 0; i < imiona.length; i++) {
-//			db.getBuilder().insert("LudziePop")
-//					.addIntValue("Wiek", lata[i])
-//					.addStringValue("Imie", imiona[i])
-//					.addStringValue("Nazwisko", nazwiska[i]).execute();
-//		}
 		
-		Query<List> selector = db.query()
-				.select("LudziePop")
+		
+		List<Query> insertLudzie = new ArrayList<>();
+		
+		String[] imiona = {"Maciej", "Ania", "Jerzy", "Marcin", "Kasia", "Sławek", "Waldek", "Beata", "Stan"};
+		String[] nazwiska = {"Taylor", "Trwała", "Schneider", "Szyba", "Ukrop", "Nowak", "Kowalski", "Albatros", "Czarny"};
+		Integer[] lata = {34, 21, 26, 26, 46, 22, 54, 28, 44};
+		
+		for(int i = 0; i < imiona.length; i++) {
+			
+			insertLudzie.add(db.query().insert("Ludzie")
+					.addIntValue("Wiek", lata[i])
+					.addStringValue("Imie", imiona[i])
+					.addStringValue("Nazwisko", nazwiska[i]));
+			
+		}
+		
+		Query<List> selectAllLudzie = db.query()
+				.select("Ludzie");
+		
+		Query<List> selectSomeLudzie = db.query()
+				.select("Ludzie")
 				.withField("Imie")
 				.withField("Wiek")
-				.whereIntFieldIsBiggerThan("Wiek", 20);
+				.whereIntFieldIsBiggerThan("Wiek", 25);
 		
-		//List wynik = selector.execute();
-		//wynik.forEach(System.out::println);
+		Query deleteAllLudzie = db.query().truncate("Ludzie");
+		Query dropLudzie = db.query().drop("Ludzie");
 		
-		//db.getQueryBuilder().drop("Ludzie").execute();
 		
-		//db.query().insert("LudziePop").addStringValue("Nazwisko", "Bezimienny2").execute();
+		Query samochody = db.query()
+				.create("Samochody")
+				.addIntField("Id").id()
+				.addStringField("Model").notNull().unique()
+				.addStringField("Marka").notNull()
+				.addIntField("Rok produkcji");
+		
+		
+		List<Query> insertSamochody = new ArrayList<>();
+		
+		Integer[] id = {1, 2, 3, 4, 5, 6, 7};
+		String[] modele = {"Fiesta", "Octavia", "Focus", "Yaris", "M8", "6", "KA"};
+		String[] marki = {"Ford", "Skoda", "Ford", "Toyota", "BMW", "Mazda", "Ford"};
+		Integer[] lataP = {1932, 1922, 1453, 1410, 111, 2345, 1312};
+		
+		for(int i = 0; i < id.length; i++) {
+			insertSamochody.add(db.query().insert("Samochody")
+					.addIntValue("Rok produkcji", lataP[i])
+					.addStringValue("Model", modele[i])
+					.addStringValue("Marka", marki[i])
+					.addIntValue("Id", id[i]));
+		}
 
-		//rep.getAllRecordList("LudziePop", loc).forEach(System.out::println);
-
-		selector.execute().forEach(System.out::println);
 		
-//		db.query().delete("LudziePop").where("Wiek", (v) -> (Integer)v == 26).execute();
+		Query<List> selectAllSamochody = db.query().select("Samochody").withField("Model");
+		Query<List> selectSomeSamochody = db.query().select("Samochody").whereStringFieldIsEqual("Marka", "Ford").where("Id", (x) -> (Integer)x*(Integer)x < 40);
 		
-		//q.execute();
-		//insert.execute();
+		Query deleteSomeSamochody = db.query().delete("Samochody").where("Rok produkcji", (x) -> (Integer)x < 1500);
+		Query dropSamochody = db.query().drop("Samochody");
+		
+//		ludzie.execute();
+//		samochody.execute();
+//		
+//		insertLudzie.forEach(Query::execute);
+//		insertSamochody.forEach(Query::execute);
+		
+//		selectAllLudzie.execute().forEach(System.out::println);
+//		selectSomeLudzie.execute().forEach(System.out::println);
+		
+//		deleteAllLudzie.execute();
+//		selectAllLudzie.execute().forEach(System.out::println);
+		
+//		selectAllSamochody.execute().forEach(System.out::println);
+//		selectSomeSamochody.execute().forEach(System.out::println);
+		
+//		deleteSomeSamochody.execute();
+//		selectAllSamochody.execute().forEach(System.out::println);
+		
+//		dropLudzie.execute();
+//		dropSamochody.execute();
 	}
 
 }

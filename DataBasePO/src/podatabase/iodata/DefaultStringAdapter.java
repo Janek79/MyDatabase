@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import podatabase.User;
 import podatabase.exceptions.InvalidName;
 import podatabase.tables.Field;
 import podatabase.tables.Record;
@@ -31,7 +32,8 @@ public class DefaultStringAdapter implements Adapter<String> {
 			if(containsImproperChars(f.getFieldName())) {
 				throw new InvalidName("Field name " + f.getFieldName() + " cannot contains characters like ':', ',' or ':'");
 			}
-			format.append(f.getType().getTypeName() + "," + f.getFieldName() + ";");
+			String[] stringRecord = {f.getType().getTypeName(), f.getFieldName(), f.isId() ? "id" : "", !f.isNullable() ? "notNull" : "", f.isUnique() ? "unique" : ""};
+			format.append(String.join(",", stringRecord) + ";");
 		}
 		
 		return format.toString();
@@ -45,13 +47,16 @@ public class DefaultStringAdapter implements Adapter<String> {
 		List<Field> fields = new ArrayList<>();
 		
 		for(String s: split[2].split(";")) {
-			String[] pair = s.split(",");
+			List<String> stringField = Arrays.asList(s.split(","));
 			try {
 				
-				Class type = Class.forName(pair[0]);
-				String fieldName = pair[1];
+				Class type = Class.forName(stringField.get(0));
+				String fieldName = stringField.get(1);
+				boolean isId = stringField.contains("id");
+				boolean isNullable = !stringField.contains("notNull");
+				boolean isUnique = stringField.contains("unique");
 				
-				Field field = new Field(fieldName, type);
+				Field field = new Field(fieldName, type, isNullable, isUnique, isId);
 				fields.add(field);
 				
 			} catch (ClassNotFoundException e) {
@@ -115,6 +120,22 @@ public class DefaultStringAdapter implements Adapter<String> {
 	@Override
 	public boolean belongsToTable(String format, Table table) {
 		return format.split(":")[1].equals(table.getTableName());
+	}
+
+	@Override
+	public String userToFormat(User u) {
+		return String.join(":", "u", u.getUsername(), u.getPassword());
+	}
+
+	@Override
+	public User formatToUser(String format) {
+		String[] userStrings = format.split(":");
+		return new User(userStrings[1], userStrings[2]);
+	}
+	
+	@Override
+	public boolean isThisUser(String format) {
+		return format.split(":")[0].equals("u");
 	}
 	
 }

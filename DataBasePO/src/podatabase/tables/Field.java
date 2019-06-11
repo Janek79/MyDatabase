@@ -13,6 +13,18 @@ public class Field {
 		this.fieldName = fieldName;
 		this.type = type;
 	}
+	
+
+	public Field(String fieldName, Type type, boolean nullable, boolean unique, boolean id) {
+		super();
+		this.fieldName = fieldName;
+		this.type = type;
+		this.nullable = nullable;
+		this.unique = unique;
+		this.id = id;
+	}
+
+
 
 	@Override
 	public int hashCode() {
@@ -52,6 +64,9 @@ public class Field {
 
 	public void setNullable(boolean nullable) {
 		this.nullable = nullable;
+		if(id && nullable) {
+			this.id = false;
+		}
 		
 	}
 
@@ -61,6 +76,9 @@ public class Field {
 
 	public void setUnique(boolean unique) {
 		this.unique = unique;
+		if(id && !unique) {
+			this.id = false;
+		}
 	}
 
 	public boolean isId() {
@@ -69,8 +87,10 @@ public class Field {
 
 	public void setId(boolean id) {
 		this.id = id;
-		this.nullable = false;
-		this.unique = true;
+		if(id) {
+			this.nullable = false;
+			this.unique = true;
+		}
 	}
 	
 	

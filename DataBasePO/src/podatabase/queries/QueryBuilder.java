@@ -16,10 +16,6 @@ public class QueryBuilder<T> {
 		return new CreateTableQuery(tableName, rep, source);
 	}
 	
-//	public SelectQuery select(String tableName, String... fields) {
-//		return new SelectQuery(tableName, fields);
-//	}
-	
 	public SelectQuery select(String tableName) {
 		return new SelectQuery(tableName, rep, source);
 	}
@@ -32,8 +28,8 @@ public class QueryBuilder<T> {
 		return new DeleteRecordQuery(tableName, rep, source);
 	}
 	
-	public Object truncate() {
-		return null;
+	public Query truncate(String tableName) {
+		return new DeleteRecordQuery(tableName, rep, source);
 	}
 	
 	public DropTableQuery drop(String tableName) {

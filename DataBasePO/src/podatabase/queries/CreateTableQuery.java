@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
+import podatabase.exceptions.ExplicitId;
 import podatabase.iodata.DefaultRepository;
 import podatabase.iodata.Repository;
 import podatabase.tables.Field;
@@ -37,18 +38,6 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 		return addField(name, String.class);
 	}
 	
-//	public CreateTableQuery addForeignKey(String name, String tableName) {
-//		return this.addField(new Field(name, String.class));
-//	}
-	
-//	private CreateTableQuery addField(Field field) {
-//		if(this.table.getField(field.getFieldName()) != null) {
-//			this.table.getFields().add(field);
-//		}
-//		
-//		return this;
-//	}
-
 	public String getTableName() {
 		return this.table.getTableName();
 	}
@@ -59,8 +48,12 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 	}
 
 	public CreateTableQuery id() {
-		currentField.setId(true);
-		return this;
+		if(table.getIdField() == null) {
+			currentField.setId(true);
+			return this;
+		} else {
+			throw new ExplicitId();
+		}
 	}
 	
 	public CreateTableQuery notNull() {
@@ -75,7 +68,7 @@ public class CreateTableQuery<T> implements Query<Boolean>{
 
 	@Override
 	public Boolean execute() {
-		rep.saveTable(table, source);
+		rep.saveTable(table);
 		return true;
 	}
 	

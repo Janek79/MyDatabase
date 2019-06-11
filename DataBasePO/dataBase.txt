@@ -1,6 +1,0 @@
-t:LudziePop:java.lang.String,Imie;java.lang.String,Nazwisko;java.lang.Integer,Wiek;
-r:LudziePop:Abraham;Lincoln;25;
-r:LudziePop:Maciej;Taylor;34;
-r:LudziePop:Jerzy;Schneider;21;
-r:LudziePop:Waldek;Kowalski;46;
-r:LudziePop:Stan;Czarny;22;
